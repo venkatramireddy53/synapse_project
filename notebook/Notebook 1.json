@@ -1,6 +1,94 @@
 {
 	"name": "Notebook 1",
 	"properties": {
-		"cells": []
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "country",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "e83273d5-e37e-415c-992e-b5ad22695c0e"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/e243760b-0df7-4bfd-a866-cac8a9d93079/resourceGroups/reddysynapse/providers/Microsoft.Synapse/workspaces/datamig/bigDataPools/country",
+				"name": "country",
+				"type": "Spark",
+				"endpoint": "https://datamig.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/country",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.5",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql import SparkSession\n",
+					""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"adls_path = \"abfss://onpdata@miniprojectstorage.dfs.core.windows.net/dbo.OLE DB Destination.parquet\"\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"df = spark.read.parquet(adls_path)\n",
+					"\n",
+					"display(df)"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df_clean= df.dropDuplicates()"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df_clean.write.mode(\"overwrite\").parquet(\"abfss://onpdata@miniprojectstorage.dfs.core.windows.net/dbo.OLE DB Destination.parquet\")\n",
+					""
+				],
+				"execution_count": 10
+			}
+		]
 	}
 }
