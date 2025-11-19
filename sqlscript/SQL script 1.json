@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-----------------------------------------------------------------------\n-- 1️⃣ Create Credential (Managed Identity)\n-----------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL MyCredential\nWITH\n    IDENTITY = 'Managed Identity';\nGO\n\n\n-----------------------------------------------------------------------\n-- 2️⃣ Create External Data Source (ADLS Gen2)\n-----------------------------------------------------------------------\nCREATE EXTERNAL DATA SOURCE ADLS_External1\nWITH (\n    LOCATION = 'abfss://onpdata@miniprojectstorage.dfs.core.windows.net/',\n    CREDENTIAL = MyCredential\n);\nGO\n\n\n-----------------------------------------------------------------------\n-- 3️⃣ Create External File Format (Parquet)\n-----------------------------------------------------------------------\nCREATE EXTERNAL FILE FORMAT ParquetFormat\nWITH (\n    FORMAT_TYPE = PARQUET\n);\nGO\n\n\n-----------------------------------------------------------------------\n-- 4️⃣ Create External Table pointing to parquet file\n-----------------------------------------------------------------------\nCREATE EXTERNAL TABLE dbo.ods_external\n(\n    ID               INT,\n    Region           VARCHAR(50),\n    Country          VARCHAR(100),\n    NumericValue     INT,\n    ExtraColumn      VARCHAR(50)\n)\nWITH (\n    LOCATION = 'dbo.OLE DB Destination.parquet',   -- Parquet file inside container\n    DATA_SOURCE = ADLS_External1,\n    FILE_FORMAT = ParquetFormat\n);\nGO\n\n\n-----------------------------------------------------------------------\n-- 5️⃣ Preview data with cleaned text values\n-----------------------------------------------------------------------\nSELECT \n    ID,\n    UPPER(Region)   AS Region,\n    UPPER(Country)  AS Country,\n    NumericValue,\n    ExtraColumn\nFROM dbo.ods_external;\nGO\n\n\n-----------------------------------------------------------------------\n-- 6️⃣ Create Internal Table with DISTINCT + UPPERCASE (CTAS)\n-----------------------------------------------------------------------\nCREATE TABLE dbo.ods_internal\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN,        -- REQUIRED for CTAS\n    CLUSTERED COLUMNSTORE INDEX        -- Recommended for analytics\n)\nAS\nSELECT DISTINCT\n    ID,\n    UPPER(Region)   AS Region,\n    UPPER(Country)  AS Country,\n    NumericValue,\n    ExtraColumn\nFROM dbo.ods_external;\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sqlpool",
+				"poolName": "sqlpool"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
